@@ -24,7 +24,7 @@ class Parser:
         # Your code goes here!
         # A good place to start is:
         self.input_lines = input_file.read().splitlines()
-        self.remove_comments()
+        self.cleanup_code()
         self.current_line = -1
 
     def has_more_commands(self) -> bool:
@@ -90,7 +90,7 @@ class Parser:
         return int(self.input_lines[self.current_line].split(" ")[2])
         pass
 
-    def remove_comments(self):
+    def cleanup_code(self):
         i = 0
         while i != len(self.input_lines):
             if len(self.input_lines[i].replace(" ", "")) == 0 or self.input_lines[i].replace(" ", "")[0] == "/":

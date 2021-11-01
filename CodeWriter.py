@@ -47,7 +47,7 @@ class CodeWriter:
         elif command == "not":
             translated_command += "D=!D\n"
         else:
-            translated_command += self.sp_pop()  # POP Y
+            translated_command += "@SP\nAM=M-1\n"  # POP Y
             if command == "add":
                 translated_command += "D=D+M\n"  # ADD
             elif command == "sub":
@@ -66,7 +66,8 @@ class CodeWriter:
                 translated_command += "D=M-D\n@TRUE.{0}\nD;{1}\nD=0\n@CONTINUE.{0}\n0;JMP\n(TRUE.{0})\nD=-1\n(CONTINUE.{0})\n".format(
                     str(self.index), jump_type)
                 self.index += 1
-        translated_command += self.sp_push()
+        translated_command += "@SP\nA=M\nM=D\n"
+        translated_command += "@SP\nM=M+1\n"  # sp = sp+1
         self.out_put.write(translated_command)
 
     def write_push_pop(self, command: str, segment: str, index: int) -> None:
@@ -103,19 +104,20 @@ class CodeWriter:
                 translated_code = "@{0}\nD=A\n{1}".format(str(index), self.sp_push())  # CHECK
             elif segment == "temp":
                 if command == "C_PUSH":
-                    translated_code += "@5\nD=A\n@{0}\nA=D+A\nD=M\n{1}".format(str(index), self.sp_push())  # CHECK here
+                    translated_code += "{0}{1}".format("@5\nD=A\n@{0}\nA=D+A\nD=M\n".format(str(index)),
+                                                       self.sp_push())  # CHECK here
                 else:  # POP
-                    translated_code += "@5\nD=A\n@{0}\nD=D+A\n@adder\nM=D\n{1}@adder\nA=M\nM=D\n".format(
+                    translated_code += "@5\nD=A\n@{0}\nD=D+A\n@adder\nM=D\n{1)}@adder\nA=M\nM=D\n".format(
                         str(index), self.sp_pop())  # CHECK
             else:  # segment == STATIC
                 if command == "C_PUSH":
-                    translated_code += "@f.{0}\nD=M\n@SP\n{1}".format(str(index), self.sp_push())  # CHECK
+                    translated_code += "{0}{1}".format("@f.{0}\nD=M\n@SP\n".format(str(index)), self.sp_push())  # CHECK
                 else:
                     translated_code += "{1}@f.{0}\nM=D\n".format(str(index), self.sp_pop())  # CHECK
         if start is not None:
             translated_code += "@{1}\nD=M\n@{0}\nA=D+A\n".format(str(index), start)
             if command == "C_PUSH":
-                translated_code += "D=M\n{0}".format(self.sp_push())  # CHECK
+                translated_code += "D=M\n" + self.sp_push()  # CHECK
             else:  # POP
                 translated_code += "@adder\nM=D\n{0}@adder\nA=M\nM=D\n".format(self.sp_pop())  # CHECK
         self.out_put.write(translated_code)
@@ -133,3 +135,4 @@ class CodeWriter:
     @staticmethod
     def sp_pop():  # poping from stack
         return "@SP\nAM=M-1\nD=M\n"
+
