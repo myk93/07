@@ -60,10 +60,12 @@ class CodeWriter:
                 if command == "eq":
                     jump_type = "JEQ"
                 elif command == "gt":
-                    jump_type = "JGT"
+                    jump_type = "JLT"
+                    translated_command += "M=M<<\nD=D<<\nD=D-M\n"
                 else:  # command == "lt":
                     jump_type = "JLT"
-                translated_command += "D=M-D\n@TRUE.{0}\nD;{1}\nD=0\n@CONTINUE.{0}\n0;JMP\n(TRUE.{0})\nD=-1\n(CONTINUE.{0})\n".format(
+                    translated_command +="M=M<<\nD=D<<\nD=M-D\n"
+                translated_command += "@TRUE.{0}\nD;{1}\nD=0\n@CONTINUE.{0}\n0;JMP\n(TRUE.{0})\nD=-1\n(CONTINUE.{0})\n".format(
                     str(self.index), jump_type)
                 self.index += 1
         translated_command += "@SP\nA=M\nM=D\n"
@@ -122,10 +124,11 @@ class CodeWriter:
                 translated_code += "@adder\nM=D\n{0}@adder\nA=M\nM=D\n".format(self.sp_pop())  # CHECK
         self.out_put.write(translated_code)
 
+
     def close(self) -> None:
         """Closes the output file."""
         # Your code goes here!
-        self.out_put.close()
+        #self.out_put.close()
         pass
 
     @staticmethod

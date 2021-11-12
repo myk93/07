@@ -96,5 +96,7 @@ class Parser:
             if len(self.input_lines[i].replace(" ", "")) == 0 or self.input_lines[i].replace(" ", "")[0] == "/":
                 self.input_lines.pop(i)
             else:
+                #removing tabs
+                self.input_lines[i] = self.input_lines[i].replace("\t", "")
                 ' '.join(self.input_lines[i].split())
                 i += 1
